@@ -1,0 +1,105 @@
+<!-- ============================================================ -->
+<!-- VIEW NODE (Port 3000) - MVC Architecture -->
+<!-- This is public/index.html -->
+<!-- ============================================================ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Enrollment System - MVC Architecture</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Online Enrollment System</h1>
+            <div class="user-info" id="userInfo">
+                <span id="userName">Guest</span>
+                <button class="btn btn-secondary" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Service Status (VIEW Component) -->
+            <div class="service-status" id="serviceStatus"></div>
+
+            <!-- Login View -->
+            <div id="loginView">
+                <div class="login-form">
+                    <h2>Login to Continue</h2>
+                    <div id="loginAlert"></div>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="loginEmail" required placeholder="student@university.edu">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="loginPassword" required placeholder="Enter your password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main App View -->
+            <div id="appView" class="hidden">
+                <div class="tabs">
+                    <button class="tab active" data-tab="courses">Available Courses</button>
+                    <button class="tab" data-tab="enrollments" id="enrollmentsTab">My Enrollments</button>
+                    <button class="tab" data-tab="grades" id="gradesTab">Grades</button>
+                </div>
+
+                <!-- Courses View -->
+                <div id="coursesView" class="tab-content active">
+                    <div id="coursesLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Loading courses...</p>
+                    </div>
+                    <div id="coursesError"></div>
+                    <div id="coursesList" class="course-grid"></div>
+                </div>
+
+                <!-- Enrollments View -->
+                <div id="enrollmentsView" class="tab-content">
+                    <div id="enrollmentsLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Loading enrollments...</p>
+                    </div>
+                    <div id="enrollmentsError"></div>
+                    <div id="enrollmentsList"></div>
+                </div>
+
+                <!-- Grades View -->
+                <div id="gradesView" class="tab-content">
+                    <div id="gradesLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Loading grades...</p>
+                    </div>
+                    <div id="gradesError"></div>
+                    <div id="gradesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade Upload Modal View (Faculty) -->
+    <div id="gradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Grades</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="gradeModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript files (VIEW logic separated) -->
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/courses.js"></script>
+    <script src="js/grades.js"></script>
+</body>
+</html>
