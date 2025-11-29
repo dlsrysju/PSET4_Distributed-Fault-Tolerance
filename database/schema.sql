@@ -72,7 +72,7 @@ ON CONFLICT (email) DO NOTHING;
 -- Sample Student Users
 INSERT INTO users (email, password_hash, role, first_name, last_name) VALUES
 ('alice@university.edu', '$2b$10$7fsG3RyuktVsIFmVVob4auqX/j9gwPT/NiEr1YPlmDkGfzBYIsYRa', 'student', 'Alice', 'Brown'),
-('bob@university.edu', '$2b$10$7fsG3RyuktVsIFmVVob4auqX/j9gwPT/NiEr1YPlmDkGfzBYIsYRaZ', 'student', 'Bob', 'Davis'),
+('bob@university.edu', '$2b$10$7fsG3RyuktVsIFmVVob4auqX/j9gwPT/NiEr1YPlmDkGfzBYIsYRa', 'student', 'Bob', 'Davis'),
 ('carol@university.edu', '$2b$10$7fsG3RyuktVsIFmVVob4auqX/j9gwPT/NiEr1YPlmDkGfzBYIsYRa', 'student', 'Carol', 'Wilson')
 ON CONFLICT (email) DO NOTHING;
 
