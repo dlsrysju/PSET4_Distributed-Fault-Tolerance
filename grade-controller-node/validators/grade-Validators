@@ -1,0 +1,91 @@
+// ========== validators/gradeValidators.js ==========
+// VALIDATION: Input validation rules for grades
+
+const { body, param, validationResult } = require('express-validator');
+
+// Validation result handler middleware
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation failed',
+      details: errors.array()
+    });
+  }
+  next();
+};
+
+// Valid grade formats (A, A-, B+, B, B-, C+, C, C-, D+, D, D-, F)
+const validGradePattern = /^([A-D][+-]?|F)$/;
+
+// Student ID parameter validation
+const validateStudentId = [
+  param('studentId')
+    .notEmpty()
+    .withMessage('Student ID is required')
+    .isInt({ min: 1 })
+    .withMessage('Student ID must be a positive integer')
+    .toInt(),
+  handleValidationErrors
+];
+
+// Grade upload validation rules
+const validateGradeUpload = [
+  body('enrollmentId')
+    .notEmpty()
+    .withMessage('Enrollment ID is required')
+    .isInt({ min: 1 })
+    .withMessage('Enrollment ID must be a positive integer')
+    .toInt(),
+  body('grade')
+    .notEmpty()
+    .withMessage('Grade is required')
+    .trim()
+    .matches(validGradePattern)
+    .withMessage('Grade must be a valid format (A, A-, B+, B, B-, C+, C, C-, D+, D, D-, F)')
+    .toUpperCase(),
+  body('remarks')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Remarks must be less than 500 characters'),
+  handleValidationErrors
+];
+
+// Batch grade upload validation
+const validateBatchGradeUpload = [
+  body('grades')
+    .isArray()
+    .withMessage('Grades must be an array')
+    .notEmpty()
+    .withMessage('Grades array cannot be empty')
+    .isLength({ max: 100 })
+    .withMessage('Cannot upload more than 100 grades at once'),
+  body('grades.*.enrollmentId')
+    .notEmpty()
+    .withMessage('Each grade must have an enrollment ID')
+    .isInt({ min: 1 })
+    .withMessage('Enrollment ID must be a positive integer')
+    .toInt(),
+  body('grades.*.grade')
+    .notEmpty()
+    .withMessage('Each grade entry must have a grade value')
+    .trim()
+    .matches(validGradePattern)
+    .withMessage('Grade must be a valid format (A, A-, B+, B, B-, C+, C, C-, D+, D, D-, F)')
+    .toUpperCase(),
+  body('grades.*.remarks')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Remarks must be less than 500 characters'),
+  handleValidationErrors
+];
+
+module.exports = {
+  validateStudentId,
+  validateGradeUpload,
+  validateBatchGradeUpload,
+  handleValidationErrors
+};
