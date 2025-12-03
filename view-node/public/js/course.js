@@ -15,6 +15,7 @@ async function loadCourses() {
             showError('courses', data.error);
         }
     } catch (error) {
+        console.error('loadCourses error:', error);
         showError('courses', 'Course controller unavailable');
     }
 }
@@ -35,7 +36,7 @@ function displayCourses(courses) {
             <div class="course-faculty">👨‍🏫 ${course.faculty_first_name || 'TBA'} ${course.faculty_last_name || ''}</div>
             <p class="course-desc">${course.description || 'No description'}</p>
             <div class="course-info">
-                <span class="course-status status-${course.status}">${course.status.toUpperCase()}</span>
+                <span class="course-status status-${course.status}">${course.status}</span>
                 <span class="enrollment-count">${course.enrolled_count || 0}/${course.max_students} enrolled</span>
             </div>
             ${currentUser.role === 'student' && course.status === 'open' ? 
@@ -65,6 +66,7 @@ async function enrollCourse(courseId) {
             alert(data.error);
         }
     } catch (error) {
+        console.error('enrollCourse error:', error);
         alert('Course controller unavailable');
     }
 }

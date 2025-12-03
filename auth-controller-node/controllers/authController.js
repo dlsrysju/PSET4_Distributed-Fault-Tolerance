@@ -1,7 +1,7 @@
 // ========== controllers/authController.js ==========
 // CONTROLLER: Authentication business logic
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/userModel');
 
@@ -30,7 +30,7 @@ class AuthController {
       if (!user) {
         return res.status(401).json({
           success: false,
-          error: 'Invalid credentials'
+          error: 'Invalid credentials auth'
         });
       }
 
@@ -40,7 +40,7 @@ class AuthController {
       if (!isValidPassword) {
         return res.status(401).json({
           success: false,
-          error: 'Invalid credentials'
+          error: 'Invalid credentials auth'
         });
       }
 

@@ -83,7 +83,7 @@ class EnrollmentController {
       console.error('Enrollment error:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to enroll in course',
+        error: 'Failed to enroll in course enrollment controller',
         service: 'course-controller'
       });
     }
@@ -92,6 +92,8 @@ class EnrollmentController {
   async getMyEnrollments(req, res) {
     try {
       const studentId = req.user.userId;
+
+      console.log(`Fetching enrollments for studentId: ${studentId}`);
 
       // Authorization check
       if (req.user.role !== 'student') {
@@ -102,6 +104,8 @@ class EnrollmentController {
       }
 
       const enrollments = await this.enrollmentModel.findByStudent(studentId);
+
+      console.log(`Found enrollments:`, enrollments);
 
       res.json({
         success: true,

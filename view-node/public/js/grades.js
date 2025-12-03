@@ -165,6 +165,7 @@ async function submitGrade(e, enrollmentId) {
 }
 
 // Check service health
+// public/js/grades.js
 async function checkServiceHealth() {
     const services = ['auth', 'course', 'grade'];
     const statusContainer = document.getElementById('serviceStatus');
@@ -172,7 +173,7 @@ async function checkServiceHealth() {
 
     for (const service of services) {
         try {
-            const response = await fetch(`${CONTROLLERS[service]}/health`, { 
+            const response = await fetch(`${HEALTH_ENDPOINTS[service]}/health`, {
                 signal: AbortSignal.timeout(2000)
             });
             const data = await response.json();
@@ -194,3 +195,4 @@ async function checkServiceHealth() {
         </span>
     `).join('');
 }
+

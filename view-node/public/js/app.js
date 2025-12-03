@@ -1,10 +1,18 @@
 // ========== js/app.js - Main Application Logic ==========
 
-// Configuration - CONTROLLER endpoints
+// public/js/app.js
+// Now all go through view-node (same origin)
 const CONTROLLERS = {
-    auth: 'http://localhost:4001',
-    course: 'http://localhost:4002',
-    grade: 'http://localhost:4003'
+    auth: '',
+    course: '',
+    grade: ''
+};
+
+// Optional: add separate URLs for health checks
+const HEALTH_ENDPOINTS = {
+    auth: 'http://localhost:4001',   // or AUTH_VM_IP:4001
+    course: 'http://localhost:4002', // or COURSE_VM_IP:4002
+    grade: 'http://localhost:4003'   // or GRADE_VM_IP:4003
 };
 
 // Application state

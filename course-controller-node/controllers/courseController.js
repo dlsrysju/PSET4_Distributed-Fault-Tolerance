@@ -12,6 +12,8 @@ class CourseController {
     try {
       const courses = await this.courseModel.findAll();
       
+      console.log('Fetched courses:', courses);
+
       res.json({
         success: true,
         data: courses

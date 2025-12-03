@@ -3,6 +3,7 @@ const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
 const path = require("path");
 
+// Load proto
 const PROTO_PATH = path.join(__dirname, "..", "protos", "course.proto");
 const pkgDef = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
@@ -13,49 +14,193 @@ const pkgDef = protoLoader.loadSync(PROTO_PATH, {
 });
 const courseProto = grpc.loadPackageDefinition(pkgDef).course;
 
-// Import your existing controllers or models
-const courseController = require("./controllers/courseController");
-const enrollmentController = require("./controllers/enrollmentController");
+// Existing controllers (classes)
+const CourseController = require("./controllers/courseController");
+const EnrollmentController = require("./controllers/enrollmentController");
 
-// Helper to adapt Express-style controllers if you have them
-function wrapExpressHandler(fn) {
-  return (params) =>
-    new Promise((resolve, reject) => {
-      const req = { body: params, params, query: params };
-      const res = {
-        json: (data) => resolve(data),
-        status: (code) => ({
-          json: (data) => reject({ code, data }),
-        }),
-      };
-      fn(req, res);
-    });
+// Instantiate controllers
+const courseController = new CourseController();
+const enrollmentController = new EnrollmentController();
+
+/**
+ * Helper to call an Express-style controller method (req, res)
+ * and adapt it to a Promise for gRPC.
+ */
+function callExpressHandler(handler, controller, {
+  body = {},
+  params = {},
+  query = {},
+  user = null,
+} = {}) {
+  return new Promise((resolve, reject) => {
+    const req = { body, params, query, user };
+
+    const res = {
+      _status: 200,
+      status(code) {
+        this._status = code;
+        return this;
+      },
+      json(payload) {
+        // If controller responded with error status, reject
+        if (this._status >= 400) {
+          const err = new Error(payload.error || "Request failed");
+          err.httpStatus = this._status;
+          err.payload = payload;
+          return reject(err);
+        }
+        return resolve(payload);
+      },
+    };
+
+    try {
+      // Bind correct `this` (controller instance)
+      handler.call(controller, req, res);
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
+/**
+ * gRPC: ListOpenCourses
+ * Uses CourseController.getAllCourses (no auth/params needed).
+ */
 async function listOpenCourses(call, callback) {
   try {
-    // If you already have a function to list courses, call it here.
-    // Example if you have model methods:
-    const courses = await courseController.getOpenCourses(); // adjust to your code
-    callback(null, { courses });
+    const result = await callExpressHandler(
+      courseController.getAllCourses,
+      courseController,
+      {}
+    );
+
+    // HTTP controller returns: { success: true, data: courses }
+    const courses = result.data || [];
+
+    console.log("gRPC ListOpenCourses fetched courses:", courses);
+
+    callback(null, {
+      courses, // field names should match Course message in course.proto
+    });
   } catch (err) {
     console.error("ListOpenCourses error:", err);
-    callback(err);
+
+    return callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to fetch courses",
+    });
   }
 }
 
+/**
+ * gRPC: Enroll
+ * Request: { userId, courseId }
+ * Adapts to EnrollmentController.enrollStudent which expects:
+ *   req.user.userId, req.user.role === 'student', req.body.courseId
+ */
 async function enroll(call, callback) {
   const { userId, courseId } = call.request;
+
+  if (!userId || !courseId) {
+    return callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      message: "userId and courseId are required",
+    });
+  }
+
   try {
-    // Adjust this to your real logic
-    const enrollment = await enrollmentController.enrollStudent(userId, courseId);
+    const result = await callExpressHandler(
+      enrollmentController.enrollStudent,
+      enrollmentController,
+      {
+        body: { courseId },
+        user: {
+          userId,        // matches EnrollmentController usage
+          role: "student",
+        },
+      }
+    );
+
+    // HTTP controller returns:
+    // { success: true, data: { enrollmentId, enrolledAt } }
+    const data = result.data || {};
+
     callback(null, {
-      enrollmentId: String(enrollment.id),
-      course: enrollment.course, // make sure this matches Course message shape
+      enrollmentId: String(data.enrollmentId || ""),
+      enrolledAt: data.enrolledAt || "",
     });
   } catch (err) {
     console.error("Enroll error:", err);
-    callback(err);
+
+    if (err.httpStatus === 400) {
+      return callback({
+        code: grpc.status.FAILED_PRECONDITION,
+        message: err.message || err.payload?.error || "Enrollment invalid",
+      });
+    }
+
+    if (err.httpStatus === 403) {
+      return callback({
+        code: grpc.status.PERMISSION_DENIED,
+        message: err.payload?.error || "Permission denied",
+      });
+    }
+
+    if (err.httpStatus === 404) {
+      return callback({
+        code: grpc.status.NOT_FOUND,
+        message: err.payload?.error || "Course not found",
+      });
+    }
+
+    if (err.httpStatus === 409) {
+      return callback({
+        code: grpc.status.ALREADY_EXISTS,
+        message: err.payload?.error || "Already enrolled",
+      });
+    }
+
+    return callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to enroll in course grpc server",
+    });
+  }
+}
+
+/**
+ * Optional gRPC: ListEnrollmentsByStudent
+ * Uses EnrollmentController.getMyEnrollments.
+ * Request: { userId }
+ */
+async function listEnrollmentsByStudent(call, callback) {
+  const { userId } = call.request;
+
+  try {
+    const result = await callExpressHandler(
+      enrollmentController.getMyEnrollments,
+      enrollmentController,
+      {
+        user: { userId, role: "student" },
+      }
+    );
+
+    const rows = result.data || [];
+
+    const enrollments = rows.map((row) => ({
+      enrollment_id: String(row.enrollment_id),
+      course_id: String(row.course_id),
+      code: row.code,
+      title: row.title,
+      description: row.description,
+      faculty_first_name: row.faculty_first_name,
+      faculty_last_name: row.faculty_last_name,
+      enrolled_at: row.enrolled_at, // ISO string from DB
+    }));
+
+    callback(null, { enrollments });
+  } catch (err) {
+    console.error("ListEnrollmentsByStudent error:", err);
+    // ...error handling...
   }
 }
 
@@ -65,6 +210,7 @@ function startGrpcServer() {
   server.addService(courseProto.CourseService.service, {
     ListOpenCourses: listOpenCourses,
     Enroll: enroll,
+    ListEnrollmentsByStudent: listEnrollmentsByStudent,
   });
 
   const port = process.env.GRPC_PORT || "50052";

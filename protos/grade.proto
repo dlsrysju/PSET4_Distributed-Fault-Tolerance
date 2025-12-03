@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package grade;
+
+service GradeService {
+  // For "My Grades" (student)
+  rpc ListGrades (ListGradesRequest) returns (ListGradesResponse);
+
+  // For "Manage Grades" (faculty) – this is what view-node is calling
+  rpc ListEnrollmentsWithGrades (ListEnrollmentsWithGradesRequest)
+      returns (ListEnrollmentsWithGradesResponse);
+
+  // For uploading / updating a grade
+  rpc UploadGrade (UploadGradeRequest) returns (UploadGradeResponse);
+}
+
+/*************  Student view ("My Grades")  *************/
+
+message ListGradesRequest {
+  string userId = 1;   // studentId
+}
+
+message GradeRecord {
+  string enrollment_id = 1;
+  string course_code   = 2;
+  string course_title  = 3;
+  string grade         = 4;
+  string remarks       = 5;
+  string faculty_first_name = 6;
+  string faculty_last_name  = 7;
+}
+
+message ListGradesResponse {
+  repeated GradeRecord grades = 1;
+}
+
+/*************  Faculty view ("Manage Grades")  *************/
+
+message ListEnrollmentsWithGradesRequest {
+  string facultyId = 1;
+}
+
+message FacultyEnrollment {
+  string enrollment_id      = 1;
+  string student_id         = 2;
+  string student_first_name = 3;
+  string student_last_name  = 4;
+  string course_code        = 5;
+  string course_title       = 6;
+  string grade              = 7;  // may be empty / "Not graded"
+  string remarks            = 8;
+}
+
+message ListEnrollmentsWithGradesResponse {
+  repeated FacultyEnrollment enrollments = 1;
+}
+
+/*************  Upload / update a grade  *************/
+
+message UploadGradeRequest {
+  string facultyId    = 1;
+  string enrollmentId = 2;
+  string grade        = 3;
+  string remarks      = 4;
+}
+
+message UploadGradeResponse {
+  GradeRecord record = 1;
+}

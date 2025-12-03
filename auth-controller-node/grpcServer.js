@@ -1,11 +1,11 @@
 // auth-controller-node/grpcServer.js
+const jwt = require('jsonwebtoken');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 const AuthController = require('./controllers/authController');
 
-// where your auth.proto is
-const PROTO_PATH = path.join(__dirname, 'protos', 'auth.proto');
+const PROTO_PATH = path.join(__dirname, '..' ,'protos', 'auth.proto');
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
@@ -54,23 +54,42 @@ function callExpressHandler(handler, { body = {}, headers = {} }) {
 
 // gRPC: Login
 async function login(call, callback) {
-  const { username, password } = call.request;
+  const { email, password } = call.request;
 
   try {
-    // ⬇️ adjust to match your actual login method name if needed
     const result = await callExpressHandler(authController.login, {
-      body: { username, password },
+      body: { email, password },
     });
+    // result is exactly what your Express controller sent:
+    // { success: true, data: { token, user } }
 
-    // Expecting result to contain { token }
-    callback(null, { token: result.token });
+    callback(null, {
+      success: result.success,                 // ⬅️ IMPORTANT
+      error: result.error || '',
+      token: result.data?.token || '',
+      user: result.data?.user || null,
+    });
   } catch (err) {
     console.error('gRPC Login error:', err);
-    const grpcError = {
-      code: grpc.status.UNAUTHENTICATED,
-      message: 'Invalid credentials',
-    };
-    callback(grpcError, null);
+
+    if (err.httpStatus === 400) {
+      return callback({
+        code: grpc.status.INVALID_ARGUMENT,
+        message: err.message || 'Email and password are required',
+      });
+    }
+
+    if (err.httpStatus === 401) {
+      return callback({
+        code: grpc.status.UNAUTHENTICATED,
+        message: 'Invalid credentials',
+      });
+    }
+
+    return callback({
+      code: grpc.status.INTERNAL,
+      message: 'Internal auth error',
+    });
   }
 }
 
@@ -78,23 +97,35 @@ async function login(call, callback) {
 async function validateToken(call, callback) {
   const { token } = call.request;
 
+  if (!token) {
+    return callback(null, {
+      valid: false,
+      userId: '',
+    });
+  }
+
   try {
-    // Replace this with however you currently verify JWTs
-    // e.g. const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const payload = await authController.verifyToken(token); // you implement this
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    // pick whatever you used when signing in login()
+    const userId =
+      String(payload.userId || payload.id || '');
 
     callback(null, {
       valid: true,
-      userId: payload.userId,
+      userId,
     });
   } catch (err) {
     console.error('gRPC ValidateToken error:', err);
+
+    // For token errors we just return valid:false instead of throwing a gRPC error
     callback(null, {
       valid: false,
       userId: '',
     });
   }
 }
+
 
 function startGrpcServer() {
   const server = new grpc.Server();

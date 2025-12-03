@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package course;
+
+service CourseService {
+  rpc ListOpenCourses (ListOpenCoursesRequest) returns (ListOpenCoursesResponse);
+  rpc Enroll (EnrollRequest) returns (EnrollResponse);
+
+  // NEW: used by /api/enrollments/my in view-node
+  rpc ListEnrollmentsByStudent (ListEnrollmentsByStudentRequest)
+      returns (ListEnrollmentsByStudentResponse);
+}
+
+message ListOpenCoursesRequest {}
+
+
+message Course {
+  string id = 1;
+  string code = 2;
+  string title = 3;
+  string description = 4;
+  string status = 5;
+  int32 max_students = 6;         
+  string faculty_first_name = 7;
+  string faculty_last_name = 8;
+  string enrolled_count = 9;       
+}
+
+message ListOpenCoursesResponse {
+  repeated Course courses = 1;
+}
+
+message EnrollRequest {
+  string userId = 1;
+  string courseId = 2;
+}
+
+message EnrollResponse {
+  string enrollmentId = 1;
+  Course course = 2;
+}
+
+/* === NEW messages for ListEnrollmentsByStudent === */
+
+message ListEnrollmentsByStudentRequest {
+  string userId = 1;
+}
+
+// Enrollment row as returned by your JOIN query
+message Enrollment {
+  string enrollment_id = 1;
+  string course_id = 2;
+  string code = 3;
+  string title = 4;
+  string description = 5;
+  string faculty_first_name = 6;
+  string faculty_last_name = 7;
+  string enrolled_at = 8; // ISO datetime string
+}
+
+message ListEnrollmentsByStudentResponse {
+  repeated Enrollment enrollments = 1;
+}
