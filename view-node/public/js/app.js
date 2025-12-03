@@ -10,9 +10,9 @@ const CONTROLLERS = {
 
 // Optional: add separate URLs for health checks
 const HEALTH_ENDPOINTS = {
-    auth: 'http://localhost:4001',   // or AUTH_VM_IP:4001
-    course: 'http://localhost:4002', // or COURSE_VM_IP:4002
-    grade: 'http://localhost:4003'   // or GRADE_VM_IP:4003
+  auth:   '/api/health/auth',
+  course: '/api/health/course',
+  grade:  '/api/health/grade',
 };
 
 // Application state

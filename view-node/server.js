@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const fetch = require('node-fetch');
 
 // gRPC clients
 const authClient = require('./grpcClients/authClient');
@@ -17,6 +18,40 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+const HEALTH_TARGETS = {
+  auth:   process.env.AUTH_HTTP_HEALTH || `http://:4001/health`,
+  course: process.env.COURSE_HTTP_HEALTH || `http://:4002/health`,
+  grade:  process.env.GRADE_HTTP_HEALTH || `http://:4003/health`,
+};
+
+app.get('/api/health/:service', async (req, res) => {
+  const service = req.params.service;
+
+  const targetUrl = HEALTH_TARGETS[service];
+  if (!targetUrl) {
+    return res.status(404).json({ success: false, error: 'Unknown service' });
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+
+    const resp = await fetch(targetUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!resp.ok) {
+      return res.json({ success: false, error: `HTTP ${resp.status}` });
+    }
+
+    const data = await resp.json();
+    // Your backend /health already returns { success: true/false, ... }
+    return res.json({ success: !!data.success });
+  } catch (err) {
+    console.error(`Health check error for ${service}:`, err.message);
+    return res.json({ success: false, error: 'unreachable' });
+  }
+});
 
 // Helper: extract Bearer token
 function getBearerToken(req) {

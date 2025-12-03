@@ -171,9 +171,11 @@ async function checkServiceHealth() {
     const statusContainer = document.getElementById('serviceStatus');
     const statuses = [];
 
+    console.log('Checking service health...', HEALTH_ENDPOINTS);
+
     for (const service of services) {
         try {
-            const response = await fetch(`${HEALTH_ENDPOINTS[service]}/health`, {
+            const response = await fetch(HEALTH_ENDPOINTS[service], {
                 signal: AbortSignal.timeout(2000)
             });
             const data = await response.json();
@@ -182,6 +184,7 @@ async function checkServiceHealth() {
                 status: data.success ? 'healthy' : 'unhealthy'
             });
         } catch (error) {
+            console.error(`Health fetch failed for ${service}:`, error);
             statuses.push({
                 name: service,
                 status: 'unhealthy'
