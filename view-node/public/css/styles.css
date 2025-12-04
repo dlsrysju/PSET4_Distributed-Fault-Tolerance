@@ -1,4 +1,15 @@
-/* ========== public/css/styles.css - VIEW Styling ========== */
+/* ========== public/css/styles.css - VIEW Styling (Green & White) ========== */
+
+:root {
+    --primary-green: #4CAF50; /* A clean, medium green */
+    --primary-dark: #388E3C; /* Darker green for hover/active */
+    --secondary-light: #F8F9FA; /* Light grey for subtle background */
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --border-light: #E0E0E0;
+    --border-medium: #BDBDBD;
+    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
 
 * {
     margin: 0;
@@ -7,32 +18,34 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--secondary-light);
     min-height: 100vh;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    box-shadow: var(--shadow-subtle);
     overflow: hidden;
 }
 
 .header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: var(--primary-green);
     color: white;
     padding: 20px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header h1 {
     font-size: 24px;
+    font-weight: 700;
 }
 
 .user-info {
@@ -45,15 +58,22 @@ body {
     padding: 30px;
 }
 
+/* --- Login Form Styles --- */
 .login-form {
     max-width: 400px;
     margin: 50px auto;
+    padding: 30px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: var(--shadow-subtle);
 }
 
 .login-form h2 {
     margin-bottom: 30px;
     text-align: center;
-    color: #333;
+    color: var(--text-dark);
+    font-weight: 600;
 }
 
 .form-group {
@@ -62,56 +82,70 @@ body {
 
 label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #333;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-dark);
+    font-size: 14px;
 }
 
 input, select, textarea {
     width: 100%;
     padding: 12px;
-    border: 2px solid #e1e1e1;
-    border-radius: 5px;
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
     font-size: 14px;
-    transition: border-color 0.3s;
+    color: var(--text-dark);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: white;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
 }
 
+/* --- Button Styles --- */
 .btn {
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    text-align: center;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: var(--primary-green);
     color: white;
-    width: 100%;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    background-color: var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background-color: white;
+    color: var(--primary-green);
+    border: 1px solid var(--primary-green);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-green);
     color: white;
 }
 
-.btn-success {
-    background: #28a745;
+.btn-success { /* Used for Enroll */
+    background-color: var(--primary-green);
     color: white;
     width: 100%;
     margin-top: 15px;
+}
+.btn-success:hover {
+    background-color: var(--primary-dark);
 }
 
 .btn-sm {
@@ -119,29 +153,33 @@ input:focus, select:focus, textarea:focus {
     font-size: 12px;
 }
 
+/* --- Alert Styles --- */
 .alert {
-    padding: 15px;
-    border-radius: 5px;
+    padding: 12px;
+    border-radius: 4px;
     margin-bottom: 20px;
+    font-size: 14px;
+    border: 1px solid transparent;
 }
 
 .alert-error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #fcebeb; /* Light Red */
+    color: #cc0000; /* Dark Red */
+    border-color: #fcc;
 }
 
 .alert-warning {
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
+    background-color: #fff8e1; /* Light Yellow */
+    color: #ffb300; /* Dark Yellow */
+    border-color: #ffe082;
 }
 
+/* --- Tab Navigation --- */
 .tabs {
     display: flex;
-    gap: 10px;
+    gap: 0;
     margin-bottom: 30px;
-    border-bottom: 2px solid #e1e1e1;
+    border-bottom: 2px solid var(--border-light);
 }
 
 .tab {
@@ -149,16 +187,21 @@ input:focus, select:focus, textarea:focus {
     cursor: pointer;
     border: none;
     background: none;
-    font-size: 14px;
-    font-weight: 600;
-    color: #666;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-medium);
     border-bottom: 3px solid transparent;
-    transition: all 0.3s;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--primary-dark);
 }
 
 .tab.active {
-    color: #667eea;
-    border-bottom-color: #667eea;
+    color: var(--primary-green);
+    border-bottom-color: var(--primary-green);
+    font-weight: 600;
 }
 
 .tab-content {
@@ -169,6 +212,7 @@ input:focus, select:focus, textarea:focus {
     display: block;
 }
 
+/* --- Course Card Grid --- */
 .course-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -176,41 +220,45 @@ input:focus, select:focus, textarea:focus {
 }
 
 .course-card {
-    border: 2px solid #e1e1e1;
-    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
     padding: 20px;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .course-card:hover {
-    border-color: #667eea;
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+    border-color: var(--primary-green);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
 }
 
 .course-code {
     font-size: 12px;
-    color: #667eea;
-    font-weight: 600;
+    color: var(--primary-dark);
+    font-weight: 700;
     margin-bottom: 5px;
+    text-transform: uppercase;
 }
 
 .course-title {
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 10px;
-    color: #333;
+    color: var(--text-dark);
 }
 
 .course-faculty {
     font-size: 14px;
-    color: #666;
+    color: var(--text-medium);
     margin-bottom: 10px;
 }
 
 .course-desc {
-    color: #666;
+    color: var(--text-medium);
     font-size: 14px;
     margin-top: 10px;
+    line-height: 1.5;
 }
 
 .course-info {
@@ -222,74 +270,85 @@ input:focus, select:focus, textarea:focus {
 
 .course-status {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
+    padding: 4px 10px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
 }
 
 .status-open {
-    background: #d4edda;
-    color: #155724;
+    background-color: #e8f5e9; /* Lightest Green */
+    color: var(--primary-dark);
 }
 
 .status-closed {
-    background: #f8d7da;
-    color: #721c24;
+    background-color: #fbecec; /* Lightest Red */
+    color: #d32f2f; /* Medium Red */
 }
 
 .enrollment-count {
     font-size: 12px;
-    color: #666;
+    color: var(--text-medium);
 }
 
+/* --- Table Styles (Grades/Enrollments) --- */
 .table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: white;
 }
 
 .table th,
 .table td {
-    padding: 12px;
+    padding: 15px;
     text-align: left;
-    border-bottom: 1px solid #e1e1e1;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .table th {
-    background: #f8f9fa;
+    background-color: var(--secondary-light);
     font-weight: 600;
-    color: #333;
+    color: var(--text-dark);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .table tr:hover {
-    background: #f8f9fa;
+    background-color: #f0fff0; /* Very light green hover */
 }
 
+/* --- Service Health Badges --- */
 .service-status {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
     flex-wrap: wrap;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--secondary-light);
 }
 
 .service-badge {
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .service-healthy {
-    background: #d4edda;
+    background-color: #d4edda;
     color: #155724;
 }
 
 .service-unhealthy {
-    background: #f8d7da;
+    background-color: #f8d7da;
     color: #721c24;
 }
 
+/* --- Modal Styles --- */
 .modal {
     display: none;
     position: fixed;
@@ -297,7 +356,7 @@ input:focus, select:focus, textarea:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     z-index: 1000;
 }
 
@@ -309,12 +368,13 @@ input:focus, select:focus, textarea:focus {
 
 .modal-content {
     background: white;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 30px;
     max-width: 500px;
     width: 90%;
-    max-height: 80vh;
+    max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .modal-header {
@@ -322,25 +382,38 @@ input:focus, select:focus, textarea:focus {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 15px;
+}
+.modal-header h3 {
+    font-weight: 600;
+    color: var(--primary-green);
 }
 
 .modal-close {
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 30px;
     cursor: pointer;
-    color: #666;
+    color: var(--text-medium);
+    line-height: 1;
+    transition: color 0.2s;
 }
 
+.modal-close:hover {
+    color: var(--text-dark);
+}
+
+/* --- Utility/Loading --- */
 .loading {
     text-align: center;
     padding: 40px;
-    color: #666;
+    color: var(--text-medium);
 }
 
 .spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
+    border: 4px solid var(--border-light);
+    border-top: 4px solid var(--primary-green);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -359,5 +432,6 @@ input:focus, select:focus, textarea:focus {
 
 .text-center {
     text-align: center;
-    color: #666;
+    color: var(--text-medium);
+    padding: 20px 0;
 }
