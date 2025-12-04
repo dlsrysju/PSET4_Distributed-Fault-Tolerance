@@ -73,6 +73,9 @@ function showApp() {
     if (currentUser.role === 'faculty') {
         document.getElementById('enrollmentsTab').style.display = 'none';
         document.getElementById('gradesTab').textContent = 'Manage Grades';
+    } else if (currentUser.role === 'student') {
+        document.getElementById('enrollmentsTab').style.display = '';
+        document.getElementById('gradesTab').textContent = 'Grades';
     }
     
     loadCourses();
