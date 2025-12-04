@@ -1,0 +1,127 @@
+version: "3.8"
+
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: auth-controller-node/Dockerfile
+    container_name: auth_service
+    ports:
+      - "4001:3000"   
+      - "50051:50051" 
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=enrollment_db
+      - DB_USER=postgres
+      - DB_PASSWORD=5718
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - ./protos:/protos:ro
+    networks:
+      - appnet
+
+  course:
+    build:
+      context: .
+      dockerfile: course-controller-node/Dockerfile
+    container_name: course_service
+    ports:
+      - "4002:3000"
+      - "50052:50052"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=enrollment_db
+      - DB_USER=postgres
+      - DB_PASSWORD=5718
+    restart: on-failure
+    volumes:
+      - ./protos:/protos:ro
+    networks:
+      - appnet
+
+  grade:
+    build:
+      context: .
+      dockerfile: grade-controller-node/Dockerfile
+    container_name: grade_service
+    ports:
+      - "4003:3000"
+      - "50053:50053"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=enrollment_db
+      - DB_USER=postgres
+      - DB_PASSWORD=5718
+    restart: on-failure
+    volumes:
+      - ./protos:/protos:ro
+    networks:
+      - appnet
+
+  view:
+    build:
+      context: .
+      dockerfile: view-node/Dockerfile
+    container_name: view_service
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - AUTH_SERVICE_ADDR=auth:50051
+      - COURSE_SERVICE_ADDR=course:50052
+      - GRADE_SERVICE_ADDR=grade:50053
+      - AUTH_HTTP_HEALTH=http://auth:3000/health
+      - COURSE_HTTP_HEALTH=http://course:3000/health
+      - GRADE_HTTP_HEALTH=http://grade:3000/health
+    networks:
+      - appnet
+    depends_on:
+      - auth
+      - course
+      - grade
+
+  pumba:
+    image: gaiaadm/pumba:0.7.8
+    container_name: pumba
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - appnet
+    command: ["--help"]
+    restart: "no"
+
+  db:
+    image: postgres:15
+    container_name: pset4_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=5718
+      - POSTGRES_DB=enrollment_db
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
