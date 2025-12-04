@@ -8,7 +8,7 @@ const gradeRoutes = require('./routes/gradeRoutes');
 const GradeController = require('./controllers/gradeController');
 
 const app = express();
-const PORT = process.env.PORT || 4003;
+const PORT = process.env.PORT || 3003;
 
 // Middleware
 app.use(cors());
@@ -50,7 +50,7 @@ app.listen(PORT, () => {
   console.log('Grade Controller Node (MVC Architecture)');
   console.log('========================================');
   console.log(`Server running on port ${PORT}`);
-  console.log(`Auth Service: ${process.env.AUTH_SERVICE_URL || 'http://localhost:4001'}`);
+  console.log(`Auth Service: ${process.env.AUTH_SERVICE_URL || 'http://auth:3001'}`);
   console.log('========================================');
 });
 

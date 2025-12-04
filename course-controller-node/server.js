@@ -9,7 +9,7 @@ const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const CourseController = require('./controllers/courseController');
 
 const app = express();
-const PORT = process.env.PORT || 4002;
+const PORT = process.env.PORT || 3002;
 
 // Middleware
 app.use(cors());
@@ -52,7 +52,7 @@ app.listen(PORT, () => {
   console.log('Course Controller Node (MVC Architecture)');
   console.log('========================================');
   console.log(`Server running on port ${PORT}`);
-  console.log(`Auth Service: ${process.env.AUTH_SERVICE_URL || 'http://localhost:4001'}`);
+  console.log(`Auth Service: ${process.env.AUTH_SERVICE_URL || 'http://auth:3001'}`);
   console.log('========================================');
 });
 

@@ -1,0 +1,70 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 5718
+      POSTGRES_DB: enrollment_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "5432:5432"
+
+  auth:
+    build:
+      context: ./auth-controller-node
+    env_file:
+      - ./auth-controller-node/.env
+    depends_on:
+      - db
+    ports:
+      - "3001:3001"
+
+  course:
+    build:
+      context: ./course-controller-node
+    env_file:
+      - ./course-controller-node/.env
+    depends_on:
+      - db
+    ports:
+      - "3002:3002"
+
+  grade:
+    build:
+      context: ./grade-controller-node
+    env_file:
+      - ./grade-controller-node/.env
+    depends_on:
+      - db
+    ports:
+      - "3003:3003"
+
+  view:
+    build:
+      context: ./view-node
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth
+      - course
+      - grade
+
+  db_replica:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 5718
+      POSTGRES_DB: enrollment_db
+    volumes:
+      - db_replica_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "5433:5432"
+
+volumes:
+  db_data:
+  db_replica_data:

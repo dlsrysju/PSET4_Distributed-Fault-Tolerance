@@ -2,9 +2,9 @@
 
 // Configuration - CONTROLLER endpoints
 const CONTROLLERS = {
-    auth: 'http://localhost:4001',
-    course: 'http://localhost:4002',
-    grade: 'http://localhost:4003'
+    auth: 'http://localhost:3001',
+    course: 'http://localhost:3002',
+    grade: 'http://localhost:3003'
 };
 
 // Application state

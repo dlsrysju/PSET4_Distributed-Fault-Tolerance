@@ -31,12 +31,12 @@ class GradeModel {
       await this.pool.query('SELECT 1');
       return this.pool;
     } catch (error) {
-      console.log('Primary database unavailable, switching to replica');
+      console.log('Primary database unavailable');
+      if (!readOnly) {
+        throw new Error('Primary database unavailable — writes are disabled');
+      }
       try {
         await this.replicaPool.query('SELECT 1');
-        if (!readOnly) {
-          console.warn('Using replica for write operation');
-        }
         return this.replicaPool;
       } catch (replicaError) {
         throw new Error('All databases unavailable');
