@@ -8,68 +8,177 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header class="header"> <h1>Online Enrollment System</h1>
+    <div class="page">
+        <header class="header">
+            <div>
+                <h1 class="title">Online Enrollment System</h1>
+            </div>
             <div class="user-info" id="userInfo">
-                <span id="userName">Guest</span>
+                <span id="userName" class="hidden">Guest</span>
+                <button class="btn btn-secondary" id="profileBtn" style="display: none;">Profile</button>
                 <button class="btn btn-secondary" id="logoutBtn" style="display: none;">Logout</button>
             </div>
         </header>
 
-        <main class="content"> <section class="service-status" id="serviceStatus"></section>
+        <main class="layout">
+            <aside class="sidebar" id="sidebar">
+                <button class="nav-btn active" data-tab="courses" role="tab" aria-selected="true">Courses</button>
+                <button class="nav-btn" data-tab="enrollments" id="enrollmentsTab" role="tab" aria-selected="false">Enrollments</button>
+                <button class="nav-btn" data-tab="grades" id="gradesTab" role="tab" aria-selected="false">Grades</button>
+            </aside>
 
-            <section id="loginView">
-                <div class="login-form">
-                    <h2>Login to Continue</h2>
-                    <div id="loginAlert"></div>
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" required placeholder="student@university.edu">
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" required placeholder="Enter your password">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </form>
-                </div>
-            </section>
-
-            <section id="appView" class="hidden">
-                <nav class="tabs" role="tablist"> <button class="tab active" data-tab="courses" role="tab" aria-selected="true">Available Courses</button>
-                    <button class="tab" data-tab="enrollments" id="enrollmentsTab" role="tab" aria-selected="false">My Enrollments</button>
-                    <button class="tab" data-tab="grades" id="gradesTab" role="tab" aria-selected="false">Grades</button>
-                </nav>
-
-                <div id="coursesView" class="tab-content active" role="tabpanel">
-                    <div id="coursesLoading" class="loading hidden">
-                        <div class="spinner"></div>
-                        <p>Loading courses...</p>
+            <section class="content-panel">
+                <section id="loginView">
+                    <div class="login-form card">
+                        <h2>Login to Continue</h2>
+                        <p class="subtext">Access your courses and grades in one place.</p>
+                        <div id="loginAlert"></div>
+                        <form id="loginForm" class="login-actions">
+                            <div>
+                                <div class="form-group">
+                                    <label for="loginEmail">Email</label>
+                                    <input type="email" id="loginEmail" required placeholder="student@university.edu">
+                                </div>
+                                <div class="form-group">
+                                    <label for="loginPassword">Password</label>
+                                    <input type="password" id="loginPassword" required placeholder="Enter your password">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary full">Login</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary full" id="openRegisterBtn">Create Account</button>
                     </div>
-                    <div id="coursesError"></div>
-                    <div id="coursesList" class="course-grid"></div>
-                </div>
+                </section>
 
-                <div id="enrollmentsView" class="tab-content" role="tabpanel" hidden>
-                    <div id="enrollmentsLoading" class="loading hidden">
-                        <div class="spinner"></div>
-                        <p>Loading enrollments...</p>
+                <section id="appView" class="hidden">
+                    <div id="coursesView" class="tab-content active" role="tabpanel">
+                        <div class="section-header">
+                            <div>
+                                <p class="eyebrow">Explore</p>
+                                <h2>Available Courses</h2>
+                            </div>
+                        </div>
+                        <div id="coursesLoading" class="loading hidden">
+                            <div class="spinner"></div>
+                            <p>Loading courses...</p>
+                        </div>
+                        <div id="coursesError"></div>
+                        <div id="coursesList" class="course-grid"></div>
                     </div>
-                    <div id="enrollmentsError"></div>
-                    <div id="enrollmentsList"></div>
-                </div>
+
+                    <div id="enrollmentsView" class="tab-content" role="tabpanel" hidden>
+                        <div class="section-header">
+                            <div>
+                                <p class="eyebrow">My Schedule</p>
+                                <h2>Enrollments</h2>
+                            </div>
+                        </div>
+                        <div id="enrollmentsLoading" class="loading hidden">
+                            <div class="spinner"></div>
+                            <p>Loading enrollments...</p>
+                        </div>
+                        <div id="enrollmentsError"></div>
+                        <div id="enrollmentsList"></div>
+                    </div>
 
                 <div id="gradesView" class="tab-content" role="tabpanel" hidden>
-                    <div id="gradesLoading" class="loading hidden">
-                        <div class="spinner"></div>
-                        <p>Loading grades...</p>
+                    <div class="section-header">
+                        <div>
+                            <p class="eyebrow">Progress</p>
+                            <h2>Grades</h2>
+                            </div>
+                        </div>
+                        <div id="gradesLoading" class="loading hidden">
+                            <div class="spinner"></div>
+                            <p>Loading grades...</p>
+                        </div>
+                        <div id="gradesError"></div>
+                        <div id="gradesList"></div>
                     </div>
-                    <div id="gradesError"></div>
-                    <div id="gradesList"></div>
-                </div>
+                </section>
             </section>
         </main>
+
+        <div id="serviceStatus" class="service-strip bottom-strip"></div>
+    </div>
+    <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="registerModal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Student Account</h3>
+                <button class="modal-close" aria-label="Close register modal">&times;</button>
+            </div>
+            <div id="registerAlert"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required placeholder="student@university.edu">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required placeholder="At least 8 chars, mixed case, number">
+                </div>
+                <div class="form-group">
+                    <label for="registerFirstName">First Name (optional)</label>
+                    <input type="text" id="registerFirstName" placeholder="First name">
+                </div>
+                <div class="form-group">
+                    <label for="registerLastName">Last Name (optional)</label>
+                    <input type="text" id="registerLastName" placeholder="Last name">
+                </div>
+                <div class="action-bar">
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Profile</h3>
+                <button class="modal-close" aria-label="Close profile modal">&times;</button>
+            </div>
+            <div class="form-group inline">
+                <label>Role</label>
+                <div class="role-badge" id="profileRoleInline">-</div>
+            </div>
+            <div id="profileAlert"></div>
+            <form id="profileForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="profileEmail">Email</label>
+                        <input type="email" id="profileEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileFirstName">First Name</label>
+                        <input type="text" id="profileFirstName" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileLastName">Last Name</label>
+                        <input type="text" id="profileLastName" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePassword">New Password (optional)</label>
+                        <input type="password" id="profilePassword" placeholder="Leave blank to keep current password">
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="studentListModal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Enrolled Students</h3>
+                <button class="modal-close" aria-label="Close student list modal">&times;</button>
+            </div>
+            <div id="studentListContent"></div>
+        </div>
     </div>
 
     <div id="gradeModal" class="modal" role="dialog" aria-modal="true">
@@ -84,6 +193,8 @@
 
     <script src="js/app.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/account.js"></script>
+    <script src="js/profile.js"></script>
     <script src="js/course.js"></script>
     <script src="js/grades.js"></script>
 </body>

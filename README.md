@@ -6,6 +6,12 @@ for auth-controller-node,
 for course and grade controller node,
 - npm install express cors dotenv @grpc/grpc-js @grpc/proto-loader
 
+for profile-controller-node,
+- npm install express cors dotenv bcryptjs jsonwebtoken axios pg @grpc/grpc-js @grpc/proto-loader
+
+for account-controller-node,
+- npm install express cors dotenv bcryptjs jsonwebtoken pg @grpc/grpc-js @grpc/proto-loader
+
 for view node,
 - npm install node-fetch@2  
 - npm install express cors dotenv @grpc/grpc-js @grpc/proto-loader

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package account;
+
+message CreateStudentRequest {
+  string email = 1;
+  string password = 2;
+  string firstName = 3;
+  string lastName = 4;
+}
+
+message CreateStudentResponse {
+  bool success = 1;
+  string error = 2;
+  string token = 3;
+  string userId = 4;
+  string email = 5;
+  string role = 6;
+  string firstName = 7;
+  string lastName = 8;
+}
+
+service AccountService {
+  rpc CreateStudent (CreateStudentRequest) returns (CreateStudentResponse);
+}

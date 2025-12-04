@@ -76,6 +76,62 @@ services:
     networks:
       - appnet
 
+  profile:
+    build:
+      context: .
+      dockerfile: profile-controller-node/Dockerfile
+    container_name: profile_service
+    ports:
+      - "4004:3000"
+      - "50054:50054"
+    environment:
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth:3000
+      - JWT_SECRET=your-secret-key-change-in-production
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=enrollment_db
+      - DB_USER=postgres
+      - DB_PASSWORD=5718
+      - DB_REPLICA_HOST=db_replica
+      - DB_REPLICA_PORT=5432
+      - GRPC_PORT=50054
+    restart: on-failure
+    volumes:
+      - ./protos:/protos:ro
+    networks:
+      - appnet
+    depends_on:
+      - auth
+      - db
+
+  account:
+    build:
+      context: .
+      dockerfile: account-controller-node/Dockerfile
+    container_name: account_service
+    ports:
+      - "4006:3000"
+      - "50055:50055"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=enrollment_db
+      - DB_USER=postgres
+      - DB_PASSWORD=5718
+      - DB_REPLICA_HOST=db_replica
+      - DB_REPLICA_PORT=5432
+      - JWT_SECRET=your-secret-key-change-in-production
+      - GRPC_PORT=50055
+    restart: on-failure
+    volumes:
+      - ./protos:/protos:ro
+    networks:
+      - appnet
+    depends_on:
+      - db
+
   view:
     build:
       context: .
@@ -89,15 +145,21 @@ services:
       - AUTH_SERVICE_ADDR=auth:50051
       - COURSE_SERVICE_ADDR=course:50052
       - GRADE_SERVICE_ADDR=grade:50053
+      - PROFILE_SERVICE_ADDR=profile:50054
+      - ACCOUNT_SERVICE_ADDR=account:50055
       - AUTH_HTTP_HEALTH=http://auth:3000/health
       - COURSE_HTTP_HEALTH=http://course:3000/health
       - GRADE_HTTP_HEALTH=http://grade:3000/health
+      - PROFILE_HTTP_HEALTH=http://profile:3000/health
+      - ACCOUNT_HTTP_HEALTH=http://account:3000/health
     networks:
       - appnet
     depends_on:
       - auth
       - course
       - grade
+      - profile
+      - account
 
   pumba:
     image: gaiaadm/pumba:0.7.8

@@ -1,15 +1,18 @@
 // view-node/server.js
-require('dotenv').config();   
+require('dotenv').config({ override: true });   
 
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const grpc = require('@grpc/grpc-js');
 
 // gRPC clients
 const authClient = require('./grpcClients/authClient');
 const courseClient = require('./grpcClients/courseClient');
 const gradeClient = require('./grpcClients/gradeClient');
+const profileClient = require('./grpcClients/profileClient');
+const accountClient = require('./grpcClients/accountClient');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,9 +23,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const HEALTH_TARGETS = {
-  auth:   process.env.AUTH_HTTP_HEALTH || `http://:4001/health`,
-  course: process.env.COURSE_HTTP_HEALTH || `http://:4002/health`,
-  grade:  process.env.GRADE_HTTP_HEALTH || `http://:4003/health`,
+  auth:   process.env.AUTH_HTTP_HEALTH || 'http://localhost:4001/health',
+  course: process.env.COURSE_HTTP_HEALTH || 'http://localhost:4002/health',
+  grade:  process.env.GRADE_HTTP_HEALTH || 'http://localhost:4003/health',
+  profile: process.env.PROFILE_HTTP_HEALTH || 'http://localhost:4004/health',
+  account: process.env.ACCOUNT_HTTP_HEALTH || 'http://localhost:4006/health',
 };
 
 app.get('/api/health/:service', async (req, res) => {
@@ -98,6 +103,169 @@ app.post('/api/auth/login', (req, res) => {
         user: response.user, // { id, email, first_name, last_name, role, ... }
       },
     });
+  });
+});
+
+// ===== ACCOUNT ROUTE =====
+app.post('/api/account/register', (req, res) => {
+  const { email, password, firstName, lastName } = req.body || {};
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Email and password are required',
+    });
+  }
+
+  accountClient.CreateStudent(
+    { email, password, firstName, lastName },
+    (err, response) => {
+      if (err) {
+        console.error('gRPC CreateStudent error:', err);
+        if (err.code === grpc.status.ALREADY_EXISTS) {
+          return res.status(409).json({
+            success: false,
+            error: 'User already exists',
+          });
+        }
+        if (err.code === grpc.status.INVALID_ARGUMENT) {
+          return res.status(400).json({
+            success: false,
+            error: err.details || 'Invalid account data',
+          });
+        }
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to create account',
+        });
+      }
+
+      if (response.success === false) {
+        return res.status(400).json({
+          success: false,
+          error: response.error || 'Failed to create account',
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        data: {
+          user: {
+            id: response.userId,
+            email: response.email,
+            role: response.role,
+            firstName: response.firstName,
+            lastName: response.lastName,
+          },
+          token: response.token,
+        },
+      });
+    }
+  );
+});
+
+// ===== PROFILE ROUTES =====
+// `${CONTROLLERS.profile}/api/profile/me`
+app.get('/api/profile/me', (req, res) => {
+  const token = getBearerToken(req);
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Missing token' });
+  }
+
+  authClient.ValidateToken({ token }, (authErr, authResp) => {
+    if (authErr || !authResp.valid) {
+      console.error('ValidateToken error (profile/me):', authErr || 'invalid');
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    profileClient.GetProfile(
+      { userId: authResp.userId },
+      (err, response) => {
+        if (err) {
+          console.error('gRPC GetProfile error:', err);
+          if (err.code === grpc.status.NOT_FOUND) {
+            return res.status(404).json({
+              success: false,
+              error: 'User not found',
+            });
+          }
+          return res.status(500).json({
+            success: false,
+            error: 'Failed to fetch profile',
+          });
+        }
+
+        return res.json({
+          success: response.success !== false,
+          data: { user: response.user },
+          error: response.error || null,
+        });
+      }
+    );
+  });
+});
+
+// `${CONTROLLERS.profile}/api/profile`
+app.put('/api/profile', (req, res) => {
+  const token = getBearerToken(req);
+  const { email, password, firstName, lastName } = req.body || {};
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Missing token' });
+  }
+
+  authClient.ValidateToken({ token }, (authErr, authResp) => {
+    if (authErr || !authResp.valid) {
+      console.error('ValidateToken error (profile/update):', authErr || 'invalid');
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    profileClient.UpdateProfile(
+      { userId: authResp.userId, email, password, firstName, lastName },
+      (err, response) => {
+        if (err) {
+          console.error('gRPC UpdateProfile error:', err);
+          if (err.code === grpc.status.ALREADY_EXISTS) {
+            return res.status(409).json({
+              success: false,
+              error: 'Email already in use',
+            });
+          }
+          if (err.code === grpc.status.INVALID_ARGUMENT) {
+            return res.status(400).json({
+              success: false,
+              error: err.details || 'Invalid profile data',
+            });
+          }
+          if (err.code === grpc.status.UNAUTHENTICATED) {
+            return res.status(401).json({
+              success: false,
+              error: 'Unauthorized',
+            });
+          }
+          return res.status(500).json({
+            success: false,
+            error: 'Failed to update profile',
+          });
+        }
+
+        if (response.success === false) {
+          return res.status(400).json({
+            success: false,
+            error: response.error || 'Failed to update profile',
+          });
+        }
+
+        return res.json({
+          success: true,
+          data: {
+            user: response.user,
+            token: response.token,
+          },
+        });
+      }
+    );
   });
 });
 

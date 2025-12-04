@@ -167,7 +167,7 @@ async function submitGrade(e, enrollmentId) {
 // Check service health
 // public/js/grades.js
 async function checkServiceHealth() {
-    const services = ['auth', 'course', 'grade'];
+    const services = ['auth', 'course', 'grade', 'profile', 'account'];
     const statusContainer = document.getElementById('serviceStatus');
     const statuses = [];
 
@@ -192,6 +192,7 @@ async function checkServiceHealth() {
         }
     }
 
+    console.log('Service health snapshot:', statuses);
     statusContainer.innerHTML = statuses.map(s => `
         <span class="service-badge service-${s.status}">
             ${s.name.toUpperCase()} Controller: ${s.status.toUpperCase()}

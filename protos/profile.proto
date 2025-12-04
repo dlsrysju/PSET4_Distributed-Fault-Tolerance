@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package profile;
+
+message UserProfile {
+  string id = 1;
+  string email = 2;
+  string role = 3;
+  string firstName = 4;
+  string lastName = 5;
+}
+
+message GetProfileRequest {
+  string userId = 1;
+}
+
+message GetProfileResponse {
+  bool success = 1;
+  string error = 2;
+  UserProfile user = 3;
+}
+
+message UpdateProfileRequest {
+  string userId = 1;
+  string email = 2;
+  string password = 3;
+  string firstName = 4;
+  string lastName = 5;
+}
+
+message UpdateProfileResponse {
+  bool success = 1;
+  string error = 2;
+  string token = 3;
+  UserProfile user = 4;
+}
+
+service ProfileService {
+  rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile (UpdateProfileRequest) returns (UpdateProfileResponse);
+}
