@@ -17,6 +17,8 @@ services:
       - DB_NAME=enrollment_db
       - DB_USER=postgres
       - DB_PASSWORD=5718
+      - DB_REPLICA_HOST=db_replica
+      - DB_REPLICA_PORT=5432
     restart: on-failure
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
@@ -43,6 +45,8 @@ services:
       - DB_NAME=enrollment_db
       - DB_USER=postgres
       - DB_PASSWORD=5718
+      - DB_REPLICA_HOST=db_replica
+      - DB_REPLICA_PORT=5432
     restart: on-failure
     volumes:
       - ./protos:/protos:ro
@@ -64,6 +68,8 @@ services:
       - DB_NAME=enrollment_db
       - DB_USER=postgres
       - DB_PASSWORD=5718
+      - DB_REPLICA_HOST=db_replica
+      - DB_REPLICA_PORT=5432
     restart: on-failure
     volumes:
       - ./protos:/protos:ro
@@ -116,6 +122,25 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - appnet
+
+  db_replica:
+    image: postgres:15
+    container_name: pset4_db_replica
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=5718
+      - POSTGRES_DB=enrollment_db
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost -p 5432 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
