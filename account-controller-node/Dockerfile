@@ -9,5 +9,6 @@ COPY protos/ /protos/
 
 ENV NODE_ENV=production
 EXPOSE 3000
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD wget -qO- http://localhost:3000/health || exit 1
+RUN apk add --no-cache curl
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD curl -fsS http://localhost:3000/health || exit 1
 CMD ["node", "server.js"]

@@ -1,4 +1,4 @@
-version: "3.8"
+ 
 
 services:
   auth:
@@ -47,6 +47,7 @@ services:
       - DB_PASSWORD=5718
       - DB_REPLICA_HOST=db_replica
       - DB_REPLICA_PORT=5432
+      - AUTH_SERVICE_ADDR=auth:50051
     restart: on-failure
     volumes:
       - ./protos:/protos:ro
@@ -70,6 +71,7 @@ services:
       - DB_PASSWORD=5718
       - DB_REPLICA_HOST=db_replica
       - DB_REPLICA_PORT=5432
+      - AUTH_SERVICE_ADDR=auth:50051
     restart: on-failure
     volumes:
       - ./protos:/protos:ro
